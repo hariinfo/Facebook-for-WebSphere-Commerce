@@ -1,0 +1,81 @@
+/*
+ *-------------------------------------------------------------------
+ *  The sample contained herein is provided to you "AS IS".
+ *  The code has been significantly redacted.
+ *  Reliability, maintainability and functionality cannot be guaranteed.
+ *-------------------------------------------------------------------
+ */
+Facebook for WebSphere Commerce // Registration and Log In
+
+Register + log in flow
+
+https://vimeo.com/59865411
+
+Facebook JavaScript SDK provides dynamic login button
+Users logs in with Facebook
+If registered with Facebook application, WebSphere Commerce conducts extended log in
+If not registered with Facebook application, redirect to registration URL
+Facebook provides registration form and signed request returns custom fields
+WebSphere Commerce registers the user, following which the user is logged in
+
+Server side log in flow
+
+https://vimeo.com/59533865
+
+User clicks OAuth URL
+User logs in with Facebook
+If not registered with the Facebook application the user is prompted to register
+Facebook returns an authorisation code
+WebSphere Commerce exchanges the code for an access token
+If registered, WebSphere Commerce conducts extended log in
+If not registered, WebSphere Commerce registers the user and subsequently logs in the user
+Step By Step Guide
+
+WebSphereCommerceServerExtensionLogic
+
+Demo code can be found on my GitHub, https://github.com/chr15hub/Facebook-for-WebSphere-Commerce.git
+
+struts-config-ext.xml
+
+<action path="/facebookLogon" type="com.ibm.commerce.struts.BaseAction" parameter="com.chris.bit.eight.commerce.facebook.FacebookLogonCmd"></action>
+<action path="/facebookRegistration" type="com.ibm.commerce.struts.BaseAction" parameter="com.chris.bit.eight.commerce.facebook.FacebookRegistrationCmd"></action>
+
+AccountDisplay.jsp
+
+<body>
+<div id="fb-root"></div>                              
+<script>
+  window.fbAsyncInit = function() {
+    // init the FB JS SDK
+    FB.init({
+      appId      : '1234567890', // App ID from the App Dashboard
+      channelUrl : '//localhost/webapp/wcs/stores/Madisons/channel.html', // Channel File for x-domain communication
+      status     : true, // check the login status upon init?
+      cookie     : true, // set sessions cookies to allow your server to access the session?
+      xfbml      : true  // parse XFBML tags on this page?
+    });
+
+    // Additional initialization code such as adding Event Listeners goes here
+FB.Event.subscribe('auth.login', function(response) {
+if (response.status === 'connected') {
+var accessToken = response.authResponse.accessToken;
+window.location.href='https://localhost/webapp/wcs/stores/servlet/facebookLogon?accessToken=' + accessToken;
+    }
+   });
+  };
+  // Load the SDK's source Asynchronously
+  // Note that the debug version is being actively developed and might 
+  // contain some type checks that are overly strict. 
+  // Please report such bugs using the bugs tool.
+  (function(d, debug){
+     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement('script'); js.id = id; js.async = true;
+     js.src = "//connect.facebook.net/en_US/all" + (debug ? "/debug" : "") + ".js";
+     ref.parentNode.insertBefore(js, ref);
+   }(document, /*debug*/ false));
+</script>
+...
+<div class="titlecenter">
+<h1><fb:login-button registration-url="https://www.facebook.com/plugins/registration?client_id=1234567890&redirect_uri=https://localhost/webapp/wcs/stores/servlet/facebookRegistration&fb_only=true&fields=%5B%7B%22name%22%3A%22name%22%7D%2C%7B%22name%22%3A%22email%22%7D%2C%7B%22name%22%3A%22street%22%2C%22description%22%3A%22Street%20address%22%2C%22type%22%3A%22text%22%7D%2C%7B%22name%22%3A%22city%22%2C%22description%22%3A%22City%22%2C%22type%22%3A%22typeahead%22%2C%20%22categories%22%3A%5B%22city%22%5D%7D%2C%7B%22name%22%3A%22state%22%2C%22description%22%3A%22State%2FProvince%22%2C%22type%22%3A%22typeahead%22%2C%20%22categories%22%3A%5B%22state_province%22%5D%7D%2C%7B%22name%22%3A%22zip%22%2C%22description%22%3A%22ZIP%20code%2FPostal%20code%3A%22%2C%22type%22%3A%22text%22%7D%5D"></fb:login-button> with Facebook</h1>
+</div>
